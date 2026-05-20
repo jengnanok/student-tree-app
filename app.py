@@ -33,7 +33,7 @@ st.write("透過量化的樹木成長狀態，一起見證學習的進步！")
 try:
     # 【關鍵改變】建立與 Google 試算表的連線 (快取時間設為 10 分鐘，ttl=600秒)
     conn = st.connection("gsheets", type=GSheetsConnection)
-    df = conn.read(worksheet="學生成績與樹木狀態", ttl=600)
+    df = conn.read(ttl=600)
     
     # 清理可能讀取到的空白列
     df = df.dropna(subset=['姓名'])
