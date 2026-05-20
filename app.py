@@ -1,11 +1,14 @@
 import streamlit as st
 import pandas as pd
-from streamlit_gsheets import GSheetsConnection # 引入 Google 試算表套件
 
 # 網頁基本設定
 st.set_page_config(page_title="學生成績大樹成長系統", page_icon="🌳", layout="centered")
 
-# 樹木視覺化的 HTML/CSS 模板 (這段都不用變)
+# 👇 【⚠️ 請在這裡貼上您的 Google 試算表完整共用網址 ⚠️】
+# 記得要把下面這串範例網址，換成您自己的真實共用網址喔！
+GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/16QQIK42kdgPwV--BXF5IL2Lz2Db6FmtjJuEGMH8LvUU/edit?usp=sharing"
+
+# 樹木視覺化的 HTML/CSS 模板
 def render_tree(level, progress_score):
     tree_data = {
         "5_茂盛大樹": {"emoji": "🌳✨🌿🍃", "desc": "卓越進步！大樹茂盛，充滿生機", "color": "#2E7D32"},
@@ -31,9 +34,14 @@ st.title("🌱 學生成績「大樹成長」視覺化系統")
 st.write("透過量化的樹木成長狀態，一起見證學習的進步！")
 
 try:
-    # 【關鍵改變】建立與 Google 試算表的連線 (快取時間設為 10 分鐘，ttl=600秒)
-    conn = st.connection("gsheets", type=GSheetsConnection)
-    df = conn.read(ttl=600)
+    # 自動將 Google 試算表共用網址轉換為可以直接下載的 CSV 格式（此方法完美支援中文）
+    if "/edit" in GOOGLE_SHEET_URL:
+        csv_url = GOOGLE_SHEET_URL.split("/edit")[0] + "/export?format=csv"
+    else:
+        csv_url = GOOGLE_SHEET_URL
+
+    # 直接讀取網址資料
+    df = pd.read_csv(csv_url)
     
     # 清理可能讀取到的空白列
     df = df.dropna(subset=['姓名'])
@@ -66,4 +74,4 @@ try:
         st.dataframe(pd.DataFrame(student_data).T)
 
 except Exception as e:
-    st.error(f"⚠️ 無法讀取 Google 試算表，請確認 Secrets 設定是否正確。 錯誤訊息: {e}")
+    st.error(f"⚠️ 讀取失敗！請確認程式碼中的 GOOGLE_SHEET_URL 是否正確，且試算表的共用設定已開啟『知道連結的任何人皆可檢視』。錯誤訊息: {e}")
